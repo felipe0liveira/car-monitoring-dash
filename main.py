@@ -1,6 +1,5 @@
 import ssd1306
 import machine
-import machine
 
 WIDTH = 128
 HEIGHT = 64
@@ -122,14 +121,15 @@ def draw_float(float_num=0.00, starting_x=0):
     num2 = output[2]
     num3 = output[3]
 
-    print([num1, num2, num3])
-
     oled.fill_rect(38, 53, 11, 11, 1)  # floating point
 
     draw_single_number(num1, 1)
     draw_single_number(num2, 2)
     draw_single_number(num3, 3)
+
+def main():
+    oled.fill(0)
+    draw_float(1.23)
     oled.show()
 
-
-draw_float(9.99)
+main()
