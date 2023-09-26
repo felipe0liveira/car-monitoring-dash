@@ -1,5 +1,7 @@
-import ssd1306
+import external_modules.ssd1306 as ssd1306
 import machine
+import random
+import time
 
 WIDTH = 128
 HEIGHT = 64
@@ -127,9 +129,23 @@ def draw_float(float_num=0.00, starting_x=0):
     draw_single_number(num2, 2)
     draw_single_number(num3, 3)
 
+
 def main():
-    oled.fill(0)
-    draw_float(1.23)
+    oled.fill(1)
+    first_line = "SANJATUNING"
+    second_line = "Monitor v1.0"
+    oled.text(first_line, int((WIDTH/2) - (len(first_line)/2*8)), 22, 0)
+    oled.text(second_line, int((WIDTH/2) - (len(second_line)/2*8)), 32, 0)
+
     oled.show()
+    time.sleep(3)
+    while True:
+        second = random.randint(70, 98)
+        float_number = float("0." + str(second))
+        oled.fill(0)
+        draw_float(float_number)
+        oled.show()
+        time.sleep_ms(100)
+
 
 main()
