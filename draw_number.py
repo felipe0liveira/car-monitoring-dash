@@ -15,58 +15,6 @@ digit_max_width = 35
 digit_max_height = 64
 digit_thicknes = 10
 
-# oled.fill_rect(38, 53, 11, 11, 1)  # point
-
-# NUMBER 0
-
-# Number 0 at position 1
-# oled.fill_rect(0, 0, 35, digit_thicknes, 1) # up
-# oled.fill_rect(25, 0, digit_thicknes, 64, 1) # right
-# oled.fill_rect(0, 54, 35, digit_thicknes, 1) # bottom
-# oled.fill_rect(0, 0, digit_thicknes, 64, 1) # left
-
-# Number 0 at position 2
-# oled.fill_rect(52, 0, 35, digit_thicknes, 1) # up
-# oled.fill_rect(77, 0, digit_thicknes, 64, 1) # right
-# oled.fill_rect(52, 54, 35, digit_thicknes, 1) # bottom
-# oled.fill_rect(52, 0, digit_thicknes, 64, 1) # left
-
-# Number 0 at position 3
-# oled.fill_rect(93, 0, 35, digit_thicknes, 1) # up
-# oled.fill_rect(118, 0, digit_thicknes, 64, 1) # right
-# oled.fill_rect(93, 54, 35, digit_thicknes, 1) # bottom
-# oled.fill_rect(93, 0, digit_thicknes, 64, 1) # left
-
-# NUMBER 1
-
-# Number 1 at position 1
-# oled.fill_rect(25, 0, digit_thicknes, 64, 1)
-
-# Number 1 at position 2
-# oled.fill_rect(77, 0, digit_thicknes, 64, 1)
-
-# Number 1 at position 3
-# oled.fill_rect(118, 0, digit_thicknes, 64, 1)
-
-# NUMBER 2
-
-# Number 2 at position 2
-# oled.fill_rect(52, 0, 35, digit_thicknes, 1)
-# oled.fill_rect(87 - digit_thicknes, 0, digit_thicknes, int(HEIGHT/2), 1)
-# oled.fill_rect(52, int(HEIGHT/2) - int(digit_thicknes/2), 35, digit_thicknes, 1)
-# oled.fill_rect(52, int(HEIGHT/2) - int(digit_thicknes/2),
-#                digit_thicknes, int(HEIGHT/2), 1)
-# oled.fill_rect(52, HEIGHT - digit_thicknes, 35, digit_thicknes, 1)
-
-# Number 2 at position 3
-# oled.fill_rect(93, 0, 35, digit_thicknes, 1)
-# oled.fill_rect(128 - digit_thicknes, 0, digit_thicknes, int(HEIGHT/2), 1)
-# oled.fill_rect(93, int(HEIGHT/2) - int(digit_thicknes/2), 35, digit_thicknes, 1)
-# oled.fill_rect(93, int(HEIGHT/2) - int(digit_thicknes/2),
-#                digit_thicknes, int(HEIGHT/2), 1)
-# oled.fill_rect(93, HEIGHT - digit_thicknes, 35, digit_thicknes, 1)
-
-
 def draw_single_number(num, position=1):
     if num == "0":
         # Number 0 at position 1
@@ -108,10 +56,10 @@ def draw_float(float_num=0.00, starting_x=0):
 
     # Draw a point
     oled.fill_rect(38, 53, 11, 11, 1)
-    # draw_single_number(num1, 1)
-    # draw_single_number(num2, 2)
+    draw_single_number(num1, 1)
+    draw_single_number(num2, 2)
     draw_single_number(num3, 3)
     oled.show()
 
 
-draw_float(2.22)
+draw_float(1.20)
