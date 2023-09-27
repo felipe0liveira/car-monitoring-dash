@@ -1,13 +1,11 @@
 import src.external_modules.ssd1306 as ssd1306
 import src.utils.fake_data as faker
-import src.constants.targets as targets
+import src.constants.targets as targets_const
 import src.constants.display as display_const
+import src.constants.formating as formating_const
 import src.utils.alignment as alignment
 import machine
-import random
 import time
-
-default_value_format = "{0:.2f}"
 
 # Display Settings
 i2c = machine.I2C(0)
@@ -15,7 +13,6 @@ i2c = machine.I2C(0)
 oled = ssd1306.SSD1306_I2C(display_const.WIDTH, display_const.HEIGHT, i2c)
 
 digit_initial_x_px = [0, 0, 52, 93]
-
 digit_y_start = 12
 digit_max_width = 35
 digit_max_height = 52
@@ -133,7 +130,7 @@ def draw_single_number(num, position=1, color=1):
 
 
 def draw_float(float_num=0.00, title=""):
-    output = default_value_format.format(float_num)
+    output = formating_const.default_value_format.format(float_num)
 
     num1 = output[0]
     num2 = output[2]
@@ -228,7 +225,7 @@ def main():
 
             led.off()
 
-            if float(lambda_value) > targets.LAMBDA_TARGET_LIMIT:
+            if float(lambda_value) > targets_const.LAMBDA_TARGET_LIMIT:
                 led.on()
 
         if display_selector == 2:
@@ -237,7 +234,7 @@ def main():
 
             led.off()
 
-            if float(oil_pressure_value) < targets.OIL_PRESSURE_TARGET_LIMIT:
+            if float(oil_pressure_value) < targets_const.OIL_PRESSURE_TARGET_LIMIT:
                 led.on()
 
         if display_selector == 3:
@@ -246,7 +243,7 @@ def main():
 
             led.off()
 
-            if float(fuel_pressure_value) < targets.FUEL_PRESSURE_TARGET_LIMIT:
+            if float(fuel_pressure_value) < targets_const.FUEL_PRESSURE_TARGET_LIMIT:
                 led.on()
 
         if display_selector == 4:
@@ -255,7 +252,7 @@ def main():
 
             led.off()
 
-            if float(map_value) > targets.MAP_TARGET_LIMIT:
+            if float(map_value) > targets_const.MAP_TARGET_LIMIT:
                 led.on()
 
         if display_selector == 5:
@@ -264,7 +261,7 @@ def main():
 
             led.off()
 
-            if float(water_temp) > targets.WATER_TEMPERATURE_TARGET_LIMIT:
+            if float(water_temp) > targets_const.WATER_TEMPERATURE_TARGET_LIMIT:
                 led.on()
 
         time.sleep_ms(100)
