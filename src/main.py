@@ -4,6 +4,7 @@ import src.constants.targets as targets_const
 import src.constants.display as display_const
 import src.constants.formating as formating_const
 import src.utils.alignment as alignment
+import src.utils.drawer.numbers as number_drawer
 import machine
 import time
 
@@ -31,104 +32,6 @@ DISPLAY_MODES = ["COMBINED", "WIDEBAND", "OIL PRESSURE",
                  "FUEL PRESSURE", "MAP", "WATER TEMP",]
 
 
-def draw_single_number(num, position=1, color=1):
-    if num == "0":
-        oled.fill_rect(digit_initial_x_px[position], digit_y_start,
-                       digit_max_width, digit_thicknes, color)  # up
-        oled.fill_rect(digit_initial_x_px[position] + digit_max_width - digit_thicknes, digit_y_start,
-                       digit_thicknes, digit_max_height, color)  # right
-        oled.fill_rect(digit_initial_x_px[position],
-                       digit_y_start + digit_max_height - digit_thicknes, digit_max_width, digit_thicknes, color)  # bottom
-        oled.fill_rect(
-            digit_initial_x_px[position], digit_y_start, digit_thicknes, digit_max_height, color)  # left
-
-    elif num == "1":
-        oled.fill_rect(
-            digit_initial_x_px[position] + digit_max_width - digit_thicknes, digit_y_start, digit_thicknes, digit_max_height, color)
-
-    elif num == "2":
-        oled.fill_rect(
-            digit_initial_x_px[position], digit_y_start, digit_max_width, digit_thicknes, color)
-        oled.fill_rect(digit_initial_x_px[position] + digit_max_width - digit_thicknes,
-                       digit_y_start, digit_thicknes, int(digit_max_height/2), color)  # half up right
-        oled.fill_rect(digit_initial_x_px[position], digit_y_start + int(digit_max_height/2) - int(digit_thicknes/2),
-                       digit_max_width, digit_thicknes, color)
-        oled.fill_rect(digit_initial_x_px[position], digit_y_start + int(digit_max_height/2) - int(digit_thicknes/2),
-                       digit_thicknes, int(digit_max_height/2), color)
-        oled.fill_rect(digit_initial_x_px[position], digit_y_start + digit_max_height -
-                       digit_thicknes, digit_max_width, digit_thicknes, color)
-
-    elif num == "3":
-        oled.fill_rect(
-            digit_initial_x_px[position], digit_y_start, digit_max_width, digit_thicknes, color)
-        oled.fill_rect(digit_initial_x_px[position] + digit_max_width - digit_thicknes, digit_y_start,
-                       digit_thicknes, digit_max_height, color)  # right
-        oled.fill_rect(digit_initial_x_px[position], digit_y_start + int(digit_max_height/2) - int(digit_thicknes/2),
-                       digit_max_width, digit_thicknes, color)
-        oled.fill_rect(digit_initial_x_px[position], digit_y_start+digit_max_height -
-                       digit_thicknes, digit_max_width, digit_thicknes, color)
-
-    elif num == "4":
-        oled.fill_rect(digit_initial_x_px[position], digit_y_start,
-                       digit_thicknes, int(digit_max_height/2) - int(digit_thicknes/2), color)  # half up left
-        oled.fill_rect(digit_initial_x_px[position] + digit_max_width - digit_thicknes, digit_y_start,
-                       digit_thicknes, digit_max_height, color)  # right
-        oled.fill_rect(digit_initial_x_px[position], digit_y_start + int(digit_max_height/2) - int(digit_thicknes/2),
-                       digit_max_width, digit_thicknes, color)
-
-    elif num == "5":
-        oled.fill_rect(
-            digit_initial_x_px[position], digit_y_start, digit_max_width, digit_thicknes, color)
-        oled.fill_rect(digit_initial_x_px[position], digit_y_start,
-                       digit_thicknes, int(digit_max_height/2) - int(digit_thicknes/2), color)  # half up left
-        oled.fill_rect(digit_initial_x_px[position], digit_y_start+int(digit_max_height/2) - int(digit_thicknes/2),
-                       digit_max_width, digit_thicknes, color)
-        oled.fill_rect(digit_initial_x_px[position] + digit_max_width - digit_thicknes,
-                       digit_y_start + int(digit_max_height/2), digit_thicknes, digit_max_height, color)  # half bottom right
-        oled.fill_rect(digit_initial_x_px[position], digit_y_start + digit_max_height -
-                       digit_thicknes, digit_max_width, digit_thicknes, color)
-
-    elif num == "6":
-        oled.fill_rect(
-            digit_initial_x_px[position], digit_y_start, digit_max_width, digit_thicknes, color)
-        oled.fill_rect(digit_initial_x_px[position], digit_y_start,
-                       digit_thicknes, digit_max_height, color)
-        oled.fill_rect(digit_initial_x_px[position], digit_y_start + int(digit_max_height/2) - int(digit_thicknes/2),
-                       digit_max_width, digit_thicknes, color)
-        oled.fill_rect(digit_initial_x_px[position] + digit_max_width - digit_thicknes,
-                       digit_y_start + int(digit_max_height/2), digit_thicknes, digit_max_height, color)  # half bottom right
-        oled.fill_rect(digit_initial_x_px[position], digit_y_start + digit_max_height -
-                       digit_thicknes, digit_max_width, digit_thicknes, color)
-
-    elif num == "7":
-        oled.fill_rect(
-            digit_initial_x_px[position], digit_y_start, digit_max_width, digit_thicknes, color)
-        oled.fill_rect(
-            digit_initial_x_px[position] + digit_max_width - digit_thicknes, digit_y_start, digit_thicknes, digit_max_height, color)
-
-    elif num == "8":
-        oled.fill_rect(digit_initial_x_px[position], digit_y_start,
-                       digit_max_width, digit_thicknes, color)  # up
-        oled.fill_rect(digit_initial_x_px[position] + digit_max_width - digit_thicknes, digit_y_start,
-                       digit_thicknes, digit_max_height, color)  # right
-        oled.fill_rect(digit_initial_x_px[position],
-                       digit_y_start + digit_max_height - digit_thicknes, digit_max_width, digit_thicknes, color)  # bottom
-        oled.fill_rect(
-            digit_initial_x_px[position], digit_y_start, digit_thicknes, digit_max_height, color)  # left
-        oled.fill_rect(digit_initial_x_px[position], digit_y_start + int(digit_max_height/2) - int(digit_thicknes/2),
-                       digit_max_width, digit_thicknes, color)  # mid full width
-
-    elif num == "9":
-        oled.fill_rect(
-            digit_initial_x_px[position], digit_y_start, digit_max_width, digit_thicknes, color)
-        oled.fill_rect(digit_initial_x_px[position] + digit_max_width - digit_thicknes, digit_y_start,
-                       digit_thicknes, digit_max_height, color)  # right
-        oled.fill_rect(digit_initial_x_px[position], digit_y_start,
-                       digit_thicknes, int(digit_max_height/2) - int(digit_thicknes/2), color)  # half up left
-        oled.fill_rect(digit_initial_x_px[position], digit_y_start + int(digit_max_height/2) - int(digit_thicknes/2),
-                       digit_max_width, digit_thicknes, color)
-
-
 def draw_float(float_num=0.00, title=""):
     output = formating_const.default_value_format.format(float_num)
 
@@ -138,9 +41,9 @@ def draw_float(float_num=0.00, title=""):
 
     oled.fill_rect(38, 53, 11, 11, 1)  # floating point
 
-    draw_single_number(num1, 1, 1)
-    draw_single_number(num2, 2, 1)
-    draw_single_number(num3, 3, 1)
+    number_drawer.draw_single_number(oled.fill_rect, num1, 1, 1)
+    number_drawer.draw_single_number(oled.fill_rect, num2, 2, 1)
+    number_drawer.draw_single_number(oled.fill_rect, num3, 3, 1)
 
     if title != "":
         oled.fill_rect(0, 0, 128, 10, 1)
@@ -150,16 +53,16 @@ def draw_float(float_num=0.00, title=""):
 def draw_three_digit_int(number=100, title=""):
     output = str(number)
     if len(output) == 1:
-        draw_single_number(output[0], 3, 1)
+        number_drawer.draw_single_number(oled.fill_rect, output[0], 3, 1)
 
     if len(output) == 2:
-        draw_single_number(output[1], 3, 1)
-        draw_single_number(output[0], 2, 1)
+        number_drawer.draw_single_number(oled.fill_rect, output[1], 3, 1)
+        number_drawer.draw_single_number(oled.fill_rect, output[0], 2, 1)
 
     if len(output) == 3:
-        draw_single_number(output[2], 3, 1)
-        draw_single_number(output[1], 2, 1)
-        draw_single_number(output[0], 1, 1)
+        number_drawer.draw_single_number(oled.fill_rect, output[2], 3, 1)
+        number_drawer.draw_single_number(oled.fill_rect, output[1], 2, 1)
+        number_drawer.draw_single_number(oled.fill_rect, output[0], 1, 1)
 
     if title != "":
         oled.fill_rect(0, 0, 128, 10, 1)
