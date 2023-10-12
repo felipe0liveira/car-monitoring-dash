@@ -82,6 +82,7 @@ def main():
     time.sleep(3)
 
     while True:
+        # WHEN BUTTON PRESSED
         if button.value() == 1:
             led.off()
             next_display_selector = display_selector + 1
@@ -107,10 +108,10 @@ def main():
             oled.text("COMBINED VIEW", alignment.centered_x(
                 "COMBINED VIEW"), 1, 0)
 
-            lambda_value = faker.get_lambda_data()
-            oled.text("Wideband", 0, 20, 1)
-            oled.text(lambda_value, display_const.WIDTH -
-                      (len(lambda_value)*8), 20, 1)
+            map_value = faker.get_map_data()
+            oled.text("MAP", 0, 20, 1)
+            oled.text(map_value, display_const.WIDTH -
+                      (len(map_value)*8), 20, 1)
 
             oil_pressure_value = faker.get_oil_pressure_data()
             oled.text("Oil", 0, 35, 1)
