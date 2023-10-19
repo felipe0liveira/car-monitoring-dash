@@ -1,176 +1,111 @@
 import src.external_modules.ssd1306 as ssd1306
-import src.utils.fake_data as faker
-import src.constants.targets as targets_const
-import src.constants.display as display_const
-import src.constants.formating as formating_const
-import src.utils.alignment as alignment
-import src.utils.drawer.numbers as number_drawer
 import machine
 import time
 
 # Display Settings
 i2c = machine.I2C(0)
-
-oled = ssd1306.SSD1306_I2C(display_const.WIDTH, display_const.HEIGHT, i2c)
-
-digit_initial_x_px = [0, 0, 52, 93]
-digit_y_start = 12
-digit_max_width = 35
-digit_max_height = 52
-digit_thicknes = 10
+oled = ssd1306.SSD1306_I2C(128, 64, i2c)
 
 # Led Settings
 led_pin = 13
 led = machine.Pin(led_pin, machine.Pin.OUT)
+led.off()
 
-# Button Settings
-button_pin = 24
-button = machine.Pin(button_pin, machine.Pin.IN)
+# PS10
+ps10 = machine.ADC(0)
 
-# Display Mode
-DISPLAY_MODES = ["COMBINED", "WIDEBAND", "OIL PRESSURE",
-                 "FUEL PRESSURE", "MAP", "WATER TEMP",]
+calibration_table = [
+    (value_ps10, psi) for value_ps10, psi in [
+        (0, 0),
+        (8226, 0),
 
+        # 10 psi
+        (11410, 10),
+        (11426, 10),
+        (11474, 10),
+        (11490, 10),
+        (11522, 10),
+        (11538, 10),
 
-def draw_float(float_num=0.00, title=""):
-    output = formating_const.default_value_format.format(float_num)
+        # 30 psi
+        (15027, 30),
+        (15107, 30),
+        (15075, 30),
+        (15123, 30),
+        (15139, 30),
+        (15155, 30),
 
-    num1 = output[0]
-    num2 = output[2]
-    num3 = output[3]
+        # 40 psi
+        (17732, 40),
+        (17748, 40),
+        (17812, 40),
+        (17844, 40),
+        (17860, 40),
 
-    oled.fill_rect(38, 53, 11, 11, 1)  # floating point
+        # 50 psi
+        (19332, 50),
+        (19364, 50),
+        (19428, 50),
+        (19460, 50),
+        (19492, 50),
 
-    number_drawer.draw_single_number(oled.fill_rect, num1, 1, 1)
-    number_drawer.draw_single_number(oled.fill_rect, num2, 2, 1)
-    number_drawer.draw_single_number(oled.fill_rect, num3, 3, 1)
+        # 60 psi
+        (22085, 60),
+        (22101, 60),
+        (22117, 60),
+        (22165, 60),
+        (22181, 60),
+        (22229, 60),
+        (22245, 60),
+        (22309, 60),
+    ]
+]
 
-    if title != "":
-        oled.fill_rect(0, 0, 128, 10, 1)
-        oled.text(title, alignment.centered_x(title), 1, 0)
+def ps10_to_psi(ps10_value):
+    # Encontre os pontos adjacentes na tabela de calibração
+    low_point = None
+    high_point = None
 
+    for value_ps10, psi in calibration_table:
+        if value_ps10 <= ps10_value:
+            low_point = (value_ps10, psi)
+        else:
+            high_point = (value_ps10, psi)
+            break
 
-def draw_three_digit_int(number=100, title=""):
-    output = str(number)
-    if len(output) == 1:
-        number_drawer.draw_single_number(oled.fill_rect, output[0], 3, 1)
+    if low_point is None or high_point is None:
+        return None
+    
+    x0, y0 = low_point
+    x1, y1 = high_point
+    psi = y0 + (y1 - y0) * (ps10_value - x0) / (x1 - x0)
+    return psi
 
-    if len(output) == 2:
-        number_drawer.draw_single_number(oled.fill_rect, output[1], 3, 1)
-        number_drawer.draw_single_number(oled.fill_rect, output[0], 2, 1)
+while True:
+    ps10_val = ps10.read_u16()
+    psi = ps10_to_psi(ps10_val)
 
-    if len(output) == 3:
-        number_drawer.draw_single_number(oled.fill_rect, output[2], 3, 1)
-        number_drawer.draw_single_number(oled.fill_rect, output[1], 2, 1)
-        number_drawer.draw_single_number(oled.fill_rect, output[0], 1, 1)
+    if psi is not None:
+        bar = (psi*0.0689476)
+        kgfcm2 = (psi*0.070307)
 
-    if title != "":
-        oled.fill_rect(0, 0, 128, 10, 1)
-        oled.text(title, alignment.centered_x(title), 1, 0)
+        print('\n\nPS10 Values')
+        print('Eng Unity: {}'.format(ps10_val))
+        print('PSI: {:.2f}'.format(psi))
+        print('BAR: {:.2f}'.format(bar))
+        print('Kgf/cm2: {:.2f}'.format(kgfcm2))
+    
 
-
-def main():
-    display_selector = 0
-
-    oled.fill(1)
-    first_line = "SANJATUNING"
-    second_line = "Monitor v1.0"
-    oled.text(first_line, alignment.centered_x(first_line), 22, 0)
-    oled.text(second_line, alignment.centered_x(second_line), 32, 0)
-
-    oled.show()
-    time.sleep(3)
-
-    while True:
-        # WHEN BUTTON PRESSED
-        if button.value() == 1:
-            led.off()
-            next_display_selector = display_selector + 1
-
-            if next_display_selector == len(DISPLAY_MODES):
-                next_display_selector = 0
-
-            display_selector = next_display_selector
-
-            current_title = DISPLAY_MODES[display_selector]
-            oled.fill(1)
-            oled.text(current_title, alignment.centered_x(
-                current_title), 28, 0)
-
-            oled.show()
-
-            time.sleep(1)
-
+        led.on()
         oled.fill(0)
-
-        if display_selector == 0:
-            oled.fill_rect(0, 0, 128, 10, 1)
-            oled.text("COMBINED VIEW", alignment.centered_x(
-                "COMBINED VIEW"), 1, 0)
-
-            map_value = faker.get_map_data()
-            oled.text("MAP", 0, 20, 1)
-            oled.text(map_value, display_const.WIDTH -
-                      (len(map_value)*8), 20, 1)
-
-            oil_pressure_value = faker.get_oil_pressure_data()
-            oled.text("Oil", 0, 35, 1)
-            oled.text(oil_pressure_value, display_const.WIDTH -
-                      (len(oil_pressure_value)*8), 35, 1)
-
-            fuel_pressure_value = faker.get_fuel_pressure_data()
-            oled.text("Fuel", 0, 50, 1)
-            oled.text(fuel_pressure_value, display_const.WIDTH -
-                      (len(fuel_pressure_value)*8), 50, 1)
-
-        if display_selector == 1:
-            lambda_value = faker.get_lambda_data()
-            draw_float(float(lambda_value), "WIDEBAND")
-
-            led.off()
-
-            if float(lambda_value) > targets_const.LAMBDA_TARGET_LIMIT:
-                led.on()
-
-        if display_selector == 2:
-            oil_pressure_value = faker.get_oil_pressure_data()
-            draw_float(float(oil_pressure_value), "OIL PRESSURE")
-
-            led.off()
-
-            if float(oil_pressure_value) < targets_const.OIL_PRESSURE_TARGET_LIMIT:
-                led.on()
-
-        if display_selector == 3:
-            fuel_pressure_value = faker.get_fuel_pressure_data()
-            draw_float(float(fuel_pressure_value), "FUEL PRESSURE")
-
-            led.off()
-
-            if float(fuel_pressure_value) < targets_const.FUEL_PRESSURE_TARGET_LIMIT:
-                led.on()
-
-        if display_selector == 4:
-            map_value = faker.get_map_data()
-            draw_float(float(map_value), "MAP SUTUTU")
-
-            led.off()
-
-            if float(map_value) > targets_const.MAP_TARGET_LIMIT:
-                led.on()
-
-        if display_selector == 5:
-            water_temp = faker.get_water_temperature_data()
-            draw_three_digit_int(water_temp, "WATER TEMP.")
-
-            led.off()
-
-            if float(water_temp) > targets_const.WATER_TEMPERATURE_TARGET_LIMIT:
-                led.on()
-
+        psi_text = '{:.2f} psi'.format(psi)
+        # bar_text = '{:.2f} Bar'.format(bar)
+        # kgfcm2_text = '{:.2f} Kg'.format(kgfcm2)
+        oled.text(psi_text, 0, 0, 1)
+        # oled.text(bar_text, 0, 10, 1)
+        # oled.text(kgfcm2_text, 0, 30, 1)
+        led.off()
         time.sleep_ms(100)
-
         oled.show()
-
-
-main()
+    else:
+        print('OUT of RANGE')
