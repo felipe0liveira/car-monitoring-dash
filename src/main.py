@@ -17,8 +17,6 @@ ps10_map = machine.ADC(1)
 ps10_oil = machine.ADC(2)
 ps10_fuel = machine.ADC(3)
 
-calibration_table = calibration.get_updated_table()
-
 
 def get_pressures():
     # TURBO MAP
@@ -70,16 +68,24 @@ def get_pressures():
 
 
 while True:
-    time.sleep_ms(50)
-    oled.fill(0)
+    time.sleep_ms(100)
 
     turbo, oil, fuel = get_pressures()
+
     map_pressure, map_unity = turbo
     oil_pressure, oil_unity = oil
     fuel_pressure, fuel_unity = fuel
 
-    oled.text('MAP:  {} {}'.format(map_pressure, map_unity), 0, 10, 1)
-    oled.text('OIL:  {} {}'.format(oil_pressure, oil_unity), 0, 30, 1)
-    oled.text('FUEL: {} {}'.format(fuel_pressure, fuel_unity), 0, 50, 1)
+    warning = (map_pressure == 'OUTRANGE' or map_pressure > 1) or \
+        (oil_pressure == 'OUTRANGE' or oil_pressure < 1) or \
+        (fuel_pressure == 'OUTRANGE' or fuel_pressure < 1)
+
+    color = (0, 1) if warning else (1, 0)
+
+    oled.fill(color[1])
+    oled.text('MAP:  {} {}'.format(map_pressure, map_unity), 0, 10, color[0])
+    oled.text('OIL:  {} {}'.format(oil_pressure, oil_unity), 0, 30, color[0])
+    oled.text('FUEL: {} {}'.format(
+        fuel_pressure, fuel_unity), 0, 50, color[0])
 
     oled.show()

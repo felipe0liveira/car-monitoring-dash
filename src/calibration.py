@@ -1,4 +1,4 @@
-calibration_table = [
+calibration_table = sorted(set(
     (value_ps10, psi) for value_ps10, psi in [
         (0, 0),
         (10200, 0),
@@ -158,15 +158,10 @@ calibration_table = [
         (52076, 79),
         (52124, 79),
     ]
-]
-
-
-def get_updated_table():
-    return sorted(set(calibration_table))
+))
 
 
 def convert_ps10_to_psi(ps10_value):
-    # from calibration table
     low_point = None
     high_point = None
 
@@ -187,8 +182,8 @@ def convert_ps10_to_psi(ps10_value):
 
 
 def convert_psi_to_kgfcm2(psi_value):
-    return (psi_value*0.070307)
+    return round((psi_value*0.070307), 2)
 
 
 def convert_psi_to_bar(psi_value):
-    return (psi_value*0.0689476)
+    return round((psi_value*0.0689476), 2)
