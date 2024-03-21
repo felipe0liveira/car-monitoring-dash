@@ -1,4 +1,5 @@
 import src.external_modules.ssd1306 as ssd1306
+import calibration
 import machine
 import time
 
@@ -7,105 +8,78 @@ i2c = machine.I2C(0)
 oled = ssd1306.SSD1306_I2C(128, 64, i2c)
 
 # Led Settings
-led_pin = 13
+led_pin = 25
 led = machine.Pin(led_pin, machine.Pin.OUT)
-led.off()
+led.on()  # to sinalize ON state
 
 # PS10
-ps10 = machine.ADC(0)
+ps10_map = machine.ADC(1)
+ps10_oil = machine.ADC(2)
+ps10_fuel = machine.ADC(3)
 
-calibration_table = [
-    (value_ps10, psi) for value_ps10, psi in [
-        (0, 0),
-        (8226, 0),
+calibration_table = calibration.get_updated_table()
 
-        # 10 psi
-        (11410, 10),
-        (11426, 10),
-        (11474, 10),
-        (11490, 10),
-        (11522, 10),
-        (11538, 10),
 
-        # 30 psi
-        (15027, 30),
-        (15107, 30),
-        (15075, 30),
-        (15123, 30),
-        (15139, 30),
-        (15155, 30),
-
-        # 40 psi
-        (17732, 40),
-        (17748, 40),
-        (17812, 40),
-        (17844, 40),
-        (17860, 40),
-
-        # 50 psi
-        (19332, 50),
-        (19364, 50),
-        (19428, 50),
-        (19460, 50),
-        (19492, 50),
-
-        # 60 psi
-        (22085, 60),
-        (22101, 60),
-        (22117, 60),
-        (22165, 60),
-        (22181, 60),
-        (22229, 60),
-        (22245, 60),
-        (22309, 60),
-    ]
-]
-
-def ps10_to_psi(ps10_value):
-    # Encontre os pontos adjacentes na tabela de calibração
-    low_point = None
-    high_point = None
-
-    for value_ps10, psi in calibration_table:
-        if value_ps10 <= ps10_value:
-            low_point = (value_ps10, psi)
-        else:
-            high_point = (value_ps10, psi)
-            break
-
-    if low_point is None or high_point is None:
-        return None
-    
-    x0, y0 = low_point
-    x1, y1 = high_point
-    psi = y0 + (y1 - y0) * (ps10_value - x0) / (x1 - x0)
-    return psi
-
-while True:
-    ps10_val = ps10.read_u16()
-    psi = ps10_to_psi(ps10_val)
+def get_pressures():
+    # TURBO MAP
+    engunity = ps10_map.read_u16()
+    psi = calibration.convert_ps10_to_psi(engunity)
+    pressure = 'OUTRANGE'
+    unity = ''
 
     if psi is not None:
-        bar = (psi*0.0689476)
-        kgfcm2 = (psi*0.070307)
+        pressure = calibration.convert_psi_to_kgfcm2(psi)
+        unity = 'kg'
 
-        print('\n\nPS10 Values')
-        print('Eng Unity: {}'.format(ps10_val))
-        print('PSI: {:.2f}'.format(psi))
-        print('BAR: {:.2f}'.format(bar))
-        print('Kgf/cm2: {:.2f}'.format(kgfcm2))
-    
+    print('\nMAP: {} {} | psi: {} | engunity: {}'.format(
+        pressure, unity, psi, engunity))
 
-        led.on()
-        oled.fill(0)
-        psi_text = '{:.2f} psi'.format(psi)
-        # bar_text = '{:.2f} Bar'.format(bar)
-        # kgfcm2_text = '{:.2f} Kg'.format(kgfcm2)
-        oled.text(psi_text, 0, 0, 1)
-        # oled.text(bar_text, 0, 10, 1)
-        # oled.text(kgfcm2_text, 0, 30, 1)
-        led.off()
-        time.sleep_ms(100)
-        oled.show()
-    else:
-        print('OUT of RANGE')
+    turbo_map = pressure, unity
+
+    # OIL PRESSURE
+    engunity = ps10_oil.read_u16()
+    psi = calibration.convert_ps10_to_psi(engunity)
+    pressure = 'OUTRANGE'
+    unity = ''
+
+    if psi is not None:
+        pressure = calibration.convert_psi_to_bar(psi)
+        unity = 'kg'
+
+    print('\nMAP: {} {} | psi: {} | engunity: {}'.format(
+        pressure, unity, psi, engunity))
+
+    oil = pressure, unity
+
+    # FUEL PRESSURE
+    engunity = ps10_fuel.read_u16()
+    psi = calibration.convert_ps10_to_psi(engunity)
+    pressure = 'OUTRANGE'
+    unity = ''
+
+    if psi is not None:
+        pressure = calibration.convert_psi_to_bar(psi)
+        unity = 'kg'
+
+    print('\nMAP: {} {} | psi: {} | engunity: {}'.format(
+        pressure, unity, psi, engunity))
+
+    fuel = pressure, unity
+
+    return turbo_map, oil, fuel
+
+
+while True:
+    time.sleep_ms(50)
+    oled.fill(0)
+
+    turbo, oil, fuel = get_pressures()
+    map_pressure, map_unity = turbo
+    oil_pressure, oil_unity = oil
+    fuel_pressure, fuel_unity = fuel
+
+    oled.text('MAP:  {} {}'.format(map_pressure, map_unity), 0, 10, 1)
+    oled.text('OIL:  {} {}'.format(oil_pressure, oil_unity), 0, 30, 1)
+    oled.text('FUEL: {} {}'.format(fuel_pressure, fuel_unity), 0, 50, 1)
+
+    oled.show()
